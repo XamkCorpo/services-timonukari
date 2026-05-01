@@ -16,7 +16,7 @@ Vastaa alla oleviin kysymyksiin omin sanoin. Kirjoita vastauksesi kysymysten all
 Miksi on ongelma jos controller sisältää kaiken logiikan (tietokantakyselyt, muunnokset, validoinnin)? Anna vähintään kaksi konkreettista haittaa.
 
 **Vastaus:**
-
+Testattavuus heikkenee huomattavasti ja ei toteuta yksikkötestauksen perusperiaatetta eli testaa vain yhtä asiaa kerrallaan.
 
 ---
 
@@ -25,11 +25,11 @@ Miksi on ongelma jos controller sisältää kaiken logiikan (tietokantakyselyt, 
 Miten vastuut jakautuvat controller:n, service:n ja repository:n välillä tässä harjoituksessa? Kirjoita lyhyt kuvaus kunkin kerroksen tehtävästä.
 
 **Controller vastaa:**
-
+Pyyntöjen vastaan ottamisesta, ohjauksesta sekä statuskoodin palauttamisesta
 **Service vastaa:**
-
+Liiketoimintalogiikasta
 **Repository vastaa:**
-
+CRUD:sta
 
 ---
 
@@ -38,7 +38,7 @@ Miten vastuut jakautuvat controller:n, service:n ja repository:n välillä täss
 Miksi DTO ↔ Entity -muunnokset kuuluvat serviceen eikä controlleriin? Mitä hyötyä siitä on, että controller ei tunne `Product`-entiteettiä lainkaan?
 
 **Vastaus:**
-
+Koska controller on tekemisissä "ulkomaailman" kanssa, niin on parempi ettei se tiedä mitään ylimääräistä.
 
 ---
 
@@ -49,7 +49,7 @@ Miksi DTO ↔ Entity -muunnokset kuuluvat serviceen eikä controlleriin? Mitä h
 Miksi controller injektoi `IProductService`-interfacen eikä suoraan `ProductService`-luokkaa? Mitä hyötyä tästä on?
 
 **Vastaus:**
-
+Tämä vähentää luokkien välistä kytköstä.
 
 ---
 
@@ -57,12 +57,12 @@ Miksi controller injektoi `IProductService`-interfacen eikä suoraan `ProductSer
 
 Selitä ero näiden kolmen elinkaaren välillä ja anna esimerkki milloin kutakin käytetään:
 
-- **AddScoped:**
-- **AddSingleton:**
-- **AddTransient:**
+- **AddScoped:** Luodaan kerran per HTTP-pyyntö
+- **AddSingleton:** Luodaan kerran sovelluksen käynnistyessä
+- **AddTransient:** Luodaan aina kun pyydetään
 
 Miksi `AddScoped` on oikea valinta `ProductService`:lle?
-
+Koska ProductService käyttää DbContextia, joka on suunniteltu vain "elämään" kerran HTTP-pyynnön aikana
 
 ---
 
@@ -71,7 +71,7 @@ Miksi `AddScoped` on oikea valinta `ProductService`:lle?
 Selitä omin sanoin mitä DI-kontti tekee kun HTTP-pyyntö saapuu ja `ProductsController` tarvitsee `IProductService`:ä. Mitä tapahtuu vaihe vaiheelta?
 
 **Vastaus:**
-
+Pyyntö saapuu -> Controllerin konstruktori vaatii IProductServicen toteutuksen
 
 ---
 
@@ -80,7 +80,7 @@ Selitä omin sanoin mitä DI-kontti tekee kun HTTP-pyyntö saapuu ja `ProductsCo
 Mitä tapahtuu jos unohdat rekisteröidä `IProductService`:n `Program.cs`:ssä? Milloin virhe ilmenee ja miltä se näyttää?
 
 **Vastaus:**
-
+Sovellus kyllä käynnistyy mutta tulee Error 500.
 
 ---
 
@@ -91,7 +91,7 @@ Mitä tapahtuu jos unohdat rekisteröidä `IProductService`:n `Program.cs`:ssä?
 `ProductService` käytti aluksi `AppDbContext`:ia suoraan. Miksi se refaktoroitiin käyttämään `IProductRepository`:a? Anna vähintään kaksi syytä.
 
 **Vastaus:**
-
+Service kerroksen ei kuulu tietää millaista tietokantaa käytetään.
 
 ---
 
@@ -99,9 +99,9 @@ Mitä tapahtuu jos unohdat rekisteröidä `IProductService`:n `Program.cs`:ssä?
 
 Mikä on `IProductService`:n ja `IProductRepository`:n välinen ero? Mitä tietotyyppejä kumpikin käsittelee (DTO vai Entity)?
 
-**IProductService:**
+**IProductService:** DTO
 
-**IProductRepository:**
+**IProductRepository:** Entity
 
 
 ---
@@ -111,7 +111,7 @@ Mikä on `IProductService`:n ja `IProductRepository`:n välinen ero? Mitä tieto
 Kun Vaihe 7:ssä lisättiin repository-kerros, `ProductsController` ei muuttunut lainkaan. Miksi? Mitä tämä kertoo rajapintojen (interface) hyödystä?
 
 **Vastaus:**
-
+Koska ProductController kommunikoi pelkästään IProductServicen kanssa. Rajapintojen hyödyt näkyvät tässä siten, että sovelluksen eri osien vaihto on "huomaamatonta" kunhan ne edelleen toetuttavat rajapinnan vaatimukset.
 
 ---
 
@@ -122,7 +122,7 @@ Kun Vaihe 7:ssä lisättiin repository-kerros, `ProductsController` ei muuttunut
 Mikä on `ILogger` ja miksi sitä tarvitaan? Mistä lokit näkee kehitysympäristössä?
 
 **Vastaus:**
-
+ILogger on .NETin sisäänrakennettu rajapinta lokitukseen ja kehitysympäristössä lokit näkee useimmiten terminaalista
 
 ---
 
@@ -130,9 +130,9 @@ Mikä on `ILogger` ja miksi sitä tarvitaan? Mistä lokit näkee kehitysympäris
 
 Selitä ero "odotetun" ja "odottamattoman" virheen välillä. Anna esimerkki kummastakin ja kerro miten ne käsitellään eri tavalla servicessä.
 
-**Odotettu virhe (esimerkki + käsittely):**
+**Odotettu virhe (esimerkki + käsittely):** esim asiakas yrittää hakea tuotteen id:tä jota ei ole olemassa, palautetaan 404 + virheviesti
 
-**Odottamaton virhe (esimerkki + käsittely):**
+**Odottamaton virhe (esimerkki + käsittely):** esim tietokantapalvelu menee alas, palautetaan 500
 
 
 ---
@@ -156,7 +156,7 @@ if (result.IsFailure)
 ```
 
 **Vastaus:**
-
+Pelkkä null ei kerro virheen syytä, tapa 2 korjaa sen käyttämällä huomattavasti selittävämpiä virheviestejä
 
 ---
 
@@ -165,7 +165,7 @@ if (result.IsFailure)
 Miten `Result Pattern` muutti virheiden käsittelyä servicessä? Vertaa Vaihe 8:n `throw;`-tapaa Vaihe 9:n `Result.Failure`-tapaan: mitä eroa niillä on asiakkaan (API:n kutsuja) näkökulmasta?
 
 **Vastaus:**
-
+throw saattaa heittää erittäin epäselkeän virheviestin kun taas Result.Failure ilmoittaa selkän virheviestin
 
 ---
 
@@ -176,7 +176,7 @@ Miten `Result Pattern` muutti virheiden käsittelyä servicessä? Vertaa Vaihe 8
 Miksi `ActionResult<ProductResponse>` on parempi kuin `IActionResult`? Anna vähintään kaksi syytä.
 
 **Vastaus:**
-
+ActionResult<ProductResponse> pakottaa palauttamaan oikeantyyppistä dataa
 
 ---
 
@@ -185,7 +185,7 @@ Miksi `ActionResult<ProductResponse>` on parempi kuin `IActionResult`? Anna väh
 Mitä `[ProducesResponseType]`-attribuutti tekee? Miten se näkyy Swagger UI:ssa?
 
 **Vastaus:**
-
+Se dokumentoi selkeästi mitä endpoint voi vastauksena antaa.
 
 ---
 
@@ -194,6 +194,6 @@ Mitä `[ProducesResponseType]`-attribuutti tekee? Miten se näkyy Swagger UI:ssa
 Sovelluksen toiminnallisuus pysyi täysin samana koko harjoituksen ajan — samat endpointit, samat vastaukset. Mitä refaktorointi tarkoittaa ja miksi se kannattaa, vaikka käyttäjä ei huomaa eroa?
 
 **Vastaus:**
-
+Refaktorointi tuotti selkeämpää, laadukkaampaa koodia, joka varmistaa bugien vähenemisen sekä uusien ominaisuuksien helpomman lisäämisen.
 
 ---
